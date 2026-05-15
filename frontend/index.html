@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Service Request Portal</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <!-- MSAL.js v3 (browser). For production, pin a version and add an SRI
+         hash by downloading the file and computing it with `openssl dgst`. -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.28.0/lib/msal-browser.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">SR</span>
+        <span class="brand-name">Service&nbsp;Request&nbsp;Portal</span>
+      </div>
+      <div class="who" id="who" hidden>
+        <span class="who-name" id="who-name"></span>
+        <button class="btn btn-ghost" id="btn-signout">Sign out</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Sign-in screen -->
+      <section class="signin" id="view-signin">
+        <div class="signin-card">
+          <h1>Call center sign-in</h1>
+          <p>Use your organization account to log service requests for customers.</p>
+          <button class="btn btn-primary" id="btn-signin">Sign in with Microsoft</button>
+          <p class="hint" id="signin-hint"></p>
+        </div>
+      </section>
+
+      <!-- Main app -->
+      <section class="app" id="view-app" hidden>
+        <div class="grid">
+          <!-- Left: form -->
+          <div class="card form-card">
+            <h2>New service request</h2>
+            <form id="case-form" novalidate>
+              <fieldset>
+                <legend>Equipment</legend>
+                <label>
+                  <span>Serial number<em>*</em></span>
+                  <input name="serialNumber" required autocomplete="off" />
+                </label>
+                <label>
+                  <span>Product model<em>*</em></span>
+                  <input name="productModel" required autocomplete="off" />
+                </label>
+                <label>
+                  <span>Purchase date</span>
+                  <input name="purchaseDate" type="date" />
+                </label>
+                <label class="full">
+                  <span>Issue description<em>*</em></span>
+                  <textarea name="issueDescription" rows="4" required></textarea>
+                </label>
+              </fieldset>
+
+              <fieldset>
+                <legend>Customer</legend>
+                <label>
+                  <span>Full name<em>*</em></span>
+                  <input name="customerName" required autocomplete="off" />
+                </label>
+                <label>
+                  <span>Phone<em>*</em></span>
+                  <input name="customerPhone" required autocomplete="off" />
+                </label>
+                <label>
+                  <span>Email</span>
+                  <input name="customerEmail" type="email" autocomplete="off" />
+                </label>
+                <label class="full">
+                  <span>Address</span>
+                  <input name="customerAddress" autocomplete="off" />
+                </label>
+              </fieldset>
+
+              <div class="actions">
+                <button class="btn btn-primary" type="submit" id="btn-submit">
+                  Create case
+                </button>
+                <span class="form-status" id="form-status" aria-live="polite"></span>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right: most recent case + list -->
+          <div class="card side-card">
+            <div id="latest" hidden>
+              <h2>Case created</h2>
+              <div class="case-number" id="latest-number"></div>
+              <p class="case-meta" id="latest-meta"></p>
+              <a
+                class="btn btn-teams"
+                id="btn-teams"
+                href="#"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M3 7h9v10H3zM13 9h5l3-2v10l-3-2h-5zM7.5 5.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"
+                  />
+                </svg>
+                Chat with Support
+              </a>
+              <p class="teams-hint" id="teams-hint">
+                Opens Teams desktop first. If Teams web shows an error page, use the desktop app.
+              </p>
+            </div>
+
+            <h2 class="recent-h">Recent cases</h2>
+            <ul class="recent" id="recent">
+              <li class="recent-empty">No cases yet.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script defer src="./auth.js"></script>
+    <script defer src="./app.js"></script>
+  </body>
+</html>
