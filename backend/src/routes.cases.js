@@ -10,8 +10,9 @@ const { buildTeamsChatLink } = require('./teamsLink');
  * @param {object} deps
  * @param {() => import('mongodb').Db} deps.getDb
  * @param {string} deps.supportTeamsContact
+ * @param {Function} [deps.createTeamsChat]
  */
-function buildCasesRouter({ getDb, supportTeamsContact }) {
+function buildCasesRouter({ getDb, supportTeamsContact, createTeamsChat }) {
   const router = express.Router();
 
   // POST /api/cases — create a new case
@@ -34,15 +35,42 @@ function buildCasesRouter({ getDb, supportTeamsContact }) {
         updatedAt: now,
       };
 
+      let teamsChatUrl = buildTeamsChatLink({
+        supportContact: supportTeamsContact,
+        caseNumber,
+        summary: doc.equipment.issueDescription,
+      });
+
+      if (typeof createTeamsChat === 'function') {
+        try {
+          const createdChat = await createTeamsChat({
+            supportContact: supportTeamsContact,
+            caseNumber,
+            summary: doc.equipment.issueDescription,
+          });
+          if (createdChat && createdChat.chatId) {
+            doc.teamsChatId = createdChat.chatId;
+            doc.teamsChatTopic = createdChat.topic;
+            doc.teamsChatTopicUpdated = Boolean(createdChat.topicUpdated);
+            if (createdChat.topicUpdateError) {
+              doc.teamsChatTopicUpdateError = createdChat.topicUpdateError;
+            }
+          }
+          if (createdChat && createdChat.webUrl) {
+            teamsChatUrl = createdChat.webUrl;
+          }
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn('[teams] create/rename failed, using deep link fallback:', err.message);
+        }
+      }
+
+      doc.teamsChatUrl = teamsChatUrl;
+
       await db.collection('serviceRequests').insertOne(doc);
 
       res.status(201).json({
         ...doc,
-        teamsChatUrl: buildTeamsChatLink({
-          supportContact: supportTeamsContact,
-          caseNumber,
-          summary: doc.equipment.issueDescription,
-        }),
       });
     } catch (err) {
       next(err);
@@ -59,7 +87,7 @@ function buildCasesRouter({ getDb, supportTeamsContact }) {
       const cursor = db
         .collection('serviceRequests')
         .find({})
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1, caseNumber: -1 })
         .skip(skip)
         .limit(limit);
 
@@ -85,11 +113,13 @@ function buildCasesRouter({ getDb, supportTeamsContact }) {
 
       res.json({
         ...doc,
-        teamsChatUrl: buildTeamsChatLink({
-          supportContact: supportTeamsContact,
-          caseNumber: doc.caseNumber,
-          summary: doc.equipment && doc.equipment.issueDescription,
-        }),
+        teamsChatUrl:
+          doc.teamsChatUrl ||
+          buildTeamsChatLink({
+            supportContact: supportTeamsContact,
+            caseNumber: doc.caseNumber,
+            summary: doc.equipment && doc.equipment.issueDescription,
+          }),
       });
     } catch (err) {
       next(err);

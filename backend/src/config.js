@@ -24,6 +24,12 @@ const config = {
     audience: process.env.ENTRA_AUDIENCE || '',
   },
   supportTeamsContact: process.env.SUPPORT_TEAMS_CONTACT || 'support@contoso.com',
+  teams: {
+    enabled: String(process.env.TEAMS_GRAPH_ENABLED || '').toLowerCase() === 'true',
+    tenantId: process.env.TEAMS_TENANT_ID || process.env.ENTRA_TENANT_ID || '',
+    clientId: process.env.TEAMS_CLIENT_ID || '',
+    clientSecret: process.env.TEAMS_CLIENT_SECRET || '',
+  },
   disableAuth: String(process.env.DISABLE_AUTH || '').toLowerCase() === 'true',
 };
 

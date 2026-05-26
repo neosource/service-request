@@ -66,10 +66,15 @@ describe('GET /api/health', () => {
 });
 
 describe('GET /api/config', () => {
-  test('exposes the configured support contact', async () => {
+  test('exposes configured runtime frontend settings', async () => {
     const res = await request(app).get('/api/config');
     expect(res.status).toBe(200);
     expect(res.body.supportTeamsContact).toBe('support@contoso.com');
+    expect(res.body.authDisabled).toBe(true);
+    expect(res.body.entra).toEqual({
+      tenantId: '',
+      audience: '',
+    });
   });
 });
 

@@ -4,6 +4,7 @@ const config = require('./config');
 const db = require('./db');
 const { buildApp } = require('./app');
 const { createEntraVerifier } = require('./auth');
+const { createTeamsChatCreator, createTeamsGraphStartupCheck } = require('./teamsApi');
 
 async function main() {
   // eslint-disable-next-line no-console
@@ -29,10 +30,20 @@ async function main() {
     };
   }
 
+  const runTeamsGraphStartupCheck = createTeamsGraphStartupCheck(config.teams);
+  if (typeof runTeamsGraphStartupCheck === 'function') {
+    await runTeamsGraphStartupCheck();
+  }
+
   const app = buildApp({
     getDb: db.getDb,
     supportTeamsContact: config.supportTeamsContact,
+    createTeamsChat: createTeamsChatCreator(config.teams),
     corsOrigins: config.corsOrigins,
+    entra: {
+      tenantId: config.entra.tenantId,
+      audience: config.entra.audience,
+    },
     auth,
   });
 

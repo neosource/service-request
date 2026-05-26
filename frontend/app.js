@@ -302,6 +302,9 @@
       const cfg = await fetchRuntimeConfig();
       if (cfg) {
         authDisabled = Boolean(cfg.authDisabled);
+        if (window.AppAuth && typeof window.AppAuth.configureFromRuntime === 'function') {
+          window.AppAuth.configureFromRuntime(cfg);
+        }
       }
 
       if (authDisabled) {

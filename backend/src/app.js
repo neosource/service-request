@@ -15,11 +15,22 @@ const { authMiddleware } = require('./auth');
  * @param {() => import('mongodb').Db} deps.getDb
  * @param {string} deps.supportTeamsContact
  * @param {string[]} deps.corsOrigins
+ * @param {Function} [deps.createTeamsChat]
  * @param {object} [deps.auth]
  * @param {Function} [deps.auth.verifier]   token verifier (or null)
  * @param {boolean}  [deps.auth.disabled]   bypass auth (dev/test only)
+ * @param {object} [deps.entra]
+ * @param {string} [deps.entra.tenantId]
+ * @param {string} [deps.entra.audience]
  */
-function buildApp({ getDb, supportTeamsContact, corsOrigins, auth = {} }) {
+function buildApp({
+  getDb,
+  supportTeamsContact,
+  corsOrigins,
+  createTeamsChat,
+  auth = {},
+  entra = {},
+}) {
   const app = express();
 
   const allowList = Array.isArray(corsOrigins) ? corsOrigins : [];
@@ -55,6 +66,10 @@ function buildApp({ getDb, supportTeamsContact, corsOrigins, auth = {} }) {
     res.json({
       supportTeamsContact,
       authDisabled: Boolean(auth.disabled),
+      entra: {
+        tenantId: entra.tenantId || '',
+        audience: entra.audience || '',
+      },
     });
   });
 
@@ -62,7 +77,7 @@ function buildApp({ getDb, supportTeamsContact, corsOrigins, auth = {} }) {
   app.use(
     '/api/cases',
     authMiddleware(auth),
-    buildCasesRouter({ getDb, supportTeamsContact })
+    buildCasesRouter({ getDb, supportTeamsContact, createTeamsChat })
   );
 
   // Serve frontend assets from ./public (container/prod) or ../frontend (local dev).

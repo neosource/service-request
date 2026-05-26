@@ -13,8 +13,8 @@ window.AppAuth = (function () {
   // ----- CONFIGURE -----
   const CONFIG = {
     tenantId: '28825646-ef41-4c9b-b69e-305d76fc24e5',
-    clientId: 'c16f448f-1ce6-4950-b07e-6815c9afca6b',
-    apiScope: 'api://c16f448f-1ce6-4950-b07e-6815c9afca6b/access_as_user',
+    clientId: '25ad7b8a-b980-4b2c-8df0-ba2d77eb9199',
+    apiScope: 'api://25ad7b8a-b980-4b2c-8df0-ba2d77eb9199/access_as_user',
   };
   // ---------------------
 
@@ -23,6 +23,25 @@ window.AppAuth = (function () {
   if (params.get('tenantId')) CONFIG.tenantId = params.get('tenantId');
   if (params.get('clientId')) CONFIG.clientId = params.get('clientId');
   if (params.get('apiScope')) CONFIG.apiScope = params.get('apiScope');
+
+  function configureFromRuntime(runtimeConfig) {
+    const entra = runtimeConfig && runtimeConfig.entra;
+    if (!entra) return;
+
+    if (entra.tenantId) {
+      CONFIG.tenantId = entra.tenantId;
+    }
+
+    if (entra.apiScope) {
+      CONFIG.apiScope = entra.apiScope;
+      return;
+    }
+
+    if (entra.audience) {
+      const audience = String(entra.audience).replace(/\/+$/, '');
+      CONFIG.apiScope = `${audience}/access_as_user`;
+    }
+  }
 
   let pca = null;
   let account = null;
@@ -94,5 +113,13 @@ window.AppAuth = (function () {
     }
   }
 
-  return { init, signIn, signOut, getAccount, getAccessToken, CONFIG };
+  return {
+    init,
+    signIn,
+    signOut,
+    getAccount,
+    getAccessToken,
+    configureFromRuntime,
+    CONFIG,
+  };
 })();
