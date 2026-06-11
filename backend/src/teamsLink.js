@@ -30,11 +30,7 @@ function buildTeamsChatLink({ upn, caseNumber }) {
     chatName: caseNumber,
     'subscription-key': '***masked***',
   };
-  // Log generated chat link context for troubleshooting without exposing secrets.
-  console.info('[teamsLink] Generated Teams chat link', {
-    url,
-    params: maskedParams,
-  });
+  
   
   return url;
 }
