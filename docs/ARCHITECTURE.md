@@ -78,11 +78,12 @@ All `/api/cases*` endpoints require a valid Entra access token.
 ## Teams Deep Link
 Format used by the "Chat with Support" button:
 ```
-https://teams.microsoft.com/l/chat/0/0
-  ?users=support@contoso.com
-  &message=Need%20help%20on%20case%20SR-20260514-00001%20%E2%80%94%20...
+https://serviceapi-uat.glory-global.com/api/teamsapi/chats
+  ?upn=agent@contoso.com
+  &chatName=SR-20260514-00001
+  &subscription-key=***
 ```
-Opens Teams (web or desktop) with a new 1-1 chat and a pre-filled first message containing the case context. The recipient address is configured via `SUPPORT_TEAMS_CONTACT`.
+The recipient UPN is taken from the authenticated user identity (`req.user.username`) instead of an environment variable.
 
 ## Configuration (env)
 | Variable                  | Description                                  |
@@ -92,7 +93,6 @@ Opens Teams (web or desktop) with a new 1-1 chat and a pre-filled first message 
 | `ENTRA_TENANT_ID`        | Azure tenant GUID                            |
 | `ENTRA_CLIENT_ID`        | App registration (API) client ID             |
 | `ENTRA_AUDIENCE`         | Expected `aud` claim (usually `api://<clientId>`) |
-| `SUPPORT_TEAMS_CONTACT`  | Email of the support agent/queue in Teams    |
 | `DISABLE_AUTH`           | `true` for local dev only                    |
 
 ## Testing Strategy

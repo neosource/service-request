@@ -31,9 +31,12 @@ async function main() {
 
   const app = buildApp({
     getDb: db.getDb,
-    supportTeamsContact: config.supportTeamsContact,
     corsOrigins: config.corsOrigins,
     auth,
+    entra: {
+      tenantId: config.entra.tenantId,
+      audience: config.entra.audience,
+    },
   });
 
   app.listen(config.port, () => {

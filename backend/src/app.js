@@ -13,13 +13,15 @@ const { authMiddleware } = require('./auth');
  *
  * @param {object} deps
  * @param {() => import('mongodb').Db} deps.getDb
- * @param {string} deps.supportTeamsContact
  * @param {string[]} deps.corsOrigins
  * @param {object} [deps.auth]
  * @param {Function} [deps.auth.verifier]   token verifier (or null)
  * @param {boolean}  [deps.auth.disabled]   bypass auth (dev/test only)
+ * @param {object} [deps.entra]
+ * @param {string} [deps.entra.tenantId]
+ * @param {string} [deps.entra.audience]
  */
-function buildApp({ getDb, supportTeamsContact, corsOrigins, auth = {} }) {
+function buildApp({ getDb, corsOrigins, auth = {}, entra = {} }) {
   const app = express();
 
   const allowList = Array.isArray(corsOrigins) ? corsOrigins : [];
@@ -52,9 +54,19 @@ function buildApp({ getDb, supportTeamsContact, corsOrigins, auth = {} }) {
   // Frontend config — non-secret values the SPA needs at runtime
   // (we deliberately do NOT expose anything sensitive here)
   app.get('/api/config', (req, res) => {
+    const authConfig = {
+      disabled: Boolean(auth.disabled),
+    };
+
+    if (!auth.disabled) {
+      authConfig.tenantId = entra.tenantId || '';
+      authConfig.audience = entra.audience || '';
+      authConfig.apiScope = entra.audience ? `${entra.audience}/access_as_user` : '';
+    }
+
     res.json({
-      supportTeamsContact,
       authDisabled: Boolean(auth.disabled),
+      auth: authConfig,
     });
   });
 
@@ -62,7 +74,7 @@ function buildApp({ getDb, supportTeamsContact, corsOrigins, auth = {} }) {
   app.use(
     '/api/cases',
     authMiddleware(auth),
-    buildCasesRouter({ getDb, supportTeamsContact })
+    buildCasesRouter({ getDb })
   );
 
   // Serve frontend assets from ./public (container/prod) or ../frontend (local dev).

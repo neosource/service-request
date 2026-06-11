@@ -4,46 +4,40 @@ const { buildTeamsChatLink } = require('../src/teamsLink');
 
 describe('buildTeamsChatLink', () => {
   test('produces a teams deep link with required fields', () => {
+
     const url = buildTeamsChatLink({
-      supportContact: 'support@contoso.com',
+      upn: 'agent@contoso.com',
       caseNumber: 'SR-20260514-00001',
-      summary: 'Will not power on',
     });
 
-    expect(url.startsWith('https://teams.microsoft.com/l/chat/0/0?')).toBe(true);
+    expect(url.startsWith('https://serviceapi-uat.glory-global.com/api/teamsapi/chats?')).toBe(true);
 
     const parsed = new URL(url);
-    expect(parsed.searchParams.get('users')).toBe('support@contoso.com');
-    expect(parsed.searchParams.get('topicName')).toBeNull();
-    expect(parsed.searchParams.get('message')).toContain('SR-20260514-00001');
-    expect(parsed.searchParams.get('message')).toContain('Will not power on');
+    expect(parsed.searchParams.get('upn')).toBe('agent@contoso.com');
+    expect(parsed.searchParams.get('chatName')).toBe('SR-20260514-00001');
   });
 
   test('works without a summary', () => {
     const url = buildTeamsChatLink({
-      supportContact: 'support@contoso.com',
+      upn: 'agent@contoso.com',
       caseNumber: 'SR-20260514-00002',
     });
     const parsed = new URL(url);
-    expect(parsed.searchParams.get('message')).toContain('SR-20260514-00002');
-    expect(parsed.searchParams.get('message')).not.toContain('Summary:');
+    expect(parsed.searchParams.get('chatName')).toBe('SR-20260514-00002');
   });
 
   test('throws on missing required fields', () => {
-    expect(() => buildTeamsChatLink({ supportContact: 'a@b.c' })).toThrow();
+    expect(() => buildTeamsChatLink({ upn: 'a@b.c' })).toThrow();
     expect(() => buildTeamsChatLink({ caseNumber: 'SR-1' })).toThrow();
   });
 
   test('properly url-encodes special characters', () => {
     const url = buildTeamsChatLink({
-      supportContact: 'support@contoso.com',
-      caseNumber: 'SR-X',
-      summary: 'Issue & detail = thing?',
+      upn: 'agent@contoso.com',
+      caseNumber: 'SR-X'
     });
     // URL-encoded ampersand should NOT split the query
     const parsed = new URL(url);
-    expect(parsed.searchParams.get('message')).toBe(
-      'Need support on case SR-X. Summary: Issue & detail = thing?'
-    );
+    expect(parsed.searchParams.get('chatName')).toBe('SR-X');
   });
 });

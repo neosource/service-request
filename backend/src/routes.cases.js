@@ -9,9 +9,8 @@ const { buildTeamsChatLink } = require('./teamsLink');
  * Build the cases router.
  * @param {object} deps
  * @param {() => import('mongodb').Db} deps.getDb
- * @param {string} deps.supportTeamsContact
  */
-function buildCasesRouter({ getDb, supportTeamsContact }) {
+function buildCasesRouter({ getDb }) {
   const router = express.Router();
 
   // POST /api/cases — create a new case
@@ -39,9 +38,8 @@ function buildCasesRouter({ getDb, supportTeamsContact }) {
       res.status(201).json({
         ...doc,
         teamsChatUrl: buildTeamsChatLink({
-          supportContact: supportTeamsContact,
+          upn: req.user.username,
           caseNumber,
-          summary: doc.equipment.issueDescription,
         }),
       });
     } catch (err) {
@@ -86,9 +84,8 @@ function buildCasesRouter({ getDb, supportTeamsContact }) {
       res.json({
         ...doc,
         teamsChatUrl: buildTeamsChatLink({
-          supportContact: supportTeamsContact,
+          upn: req.user.username,
           caseNumber: doc.caseNumber,
-          summary: doc.equipment && doc.equipment.issueDescription,
         }),
       });
     } catch (err) {

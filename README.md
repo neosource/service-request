@@ -8,7 +8,7 @@ A web application for **call center agents** to file service requests on behalf 
 - **Auto-generated case numbers** in the form `SR-YYYYMMDD-NNNNN`, unique even under concurrent writes.
 - **"Chat with Support" button** that opens a new Microsoft Teams chat pre-titled with the case number and a starter message containing the case context.
 - **MongoDB persistence** with sensible indexes, including a unique index on `caseNumber`.
-- **Podman script** to bring up a configured MongoDB container with the application database, user, and indexes ready to go.
+- **Container runtime scripts (Podman or Docker)** to bring up a configured MongoDB container with the application database, user, and indexes ready to go.
 - **Test suite** covering case-number generation, input validation, auth middleware, the Teams deep-link builder, and the full HTTP API.
 
 ## Repository layout
@@ -37,25 +37,41 @@ service-request-app/
 │   ├── auth.js                  # MSAL.js wrapper
 │   └── app.js                   # UI logic
 ├── scripts/
-│   └── mongodb-podman.sh        # Podman script to run MongoDB
+│   ├── mongodb-podman.sh        # Podman script to run MongoDB
+│   ├── mongodb-docker.sh        # Docker script to run MongoDB
+│   └── mongo-init/
+│       └── 01-init-app-user.js # auto-generated Mongo init script
 └── Containerfile                # builds backend + bundles frontend
 ```
 
 ## Quick start
 
-### 1. Start MongoDB with Podman
+### 1. Start MongoDB with Podman or Docker
+
+Choose one runtime and run the matching script.
+
+#### Option A: Podman
 
 ```bash
 cd scripts
 ./mongodb-podman.sh up
 ```
 
+Useful commands: `./mongodb-podman.sh status | logs | shell | down | purge`.
+
+#### Option B: Docker
+
+```bash
+cd scripts
+./mongodb-docker.sh up
+```
+
+Useful commands: `./mongodb-docker.sh status | logs | shell | down | purge`.
+
 This creates a `sr-mongo` container with:
 - a root admin user (`root` / `rootpass-change-me` — override with env vars)
 - an application user (`srapp` / `srapp-pass`) with `readWrite` on the `service_requests` database
 - the `serviceRequests` and `counters` collections, plus required indexes
-
-Useful commands: `./mongodb-podman.sh status | logs | shell | down | purge`.
 
 ### 2. Configure and run the backend
 
@@ -141,7 +157,7 @@ Sample response (excerpt):
 {
   "caseNumber": "SR-20260514-00001",
   "status": "open",
-  "teamsChatUrl": "https://teams.microsoft.com/l/chat/0/0?users=support%40contoso.com&message=..."
+  "teamsChatUrl": "https://serviceapi-uat.glory-global.com/api/teamsapi/chats?upn=agent%40contoso.com&chatName=SR-20260514-00001..."
 }
 ```
 

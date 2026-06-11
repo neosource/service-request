@@ -302,6 +302,15 @@
       const cfg = await fetchRuntimeConfig();
       if (cfg) {
         authDisabled = Boolean(cfg.authDisabled);
+
+        if (!authDisabled && cfg.auth) {
+          if (cfg.auth.tenantId) {
+            AppAuth.CONFIG.tenantId = cfg.auth.tenantId;
+          }
+          if (cfg.auth.apiScope) {
+            AppAuth.CONFIG.apiScope = cfg.auth.apiScope;
+          }
+        }
       }
 
       if (authDisabled) {

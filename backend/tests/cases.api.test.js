@@ -29,7 +29,6 @@ beforeAll(async () => {
 
   app = buildApp({
     getDb: () => db,
-    supportTeamsContact: 'support@contoso.com',
     corsOrigins: ['http://localhost'],
     auth: { disabled: true },
   });
@@ -66,10 +65,11 @@ describe('GET /api/health', () => {
 });
 
 describe('GET /api/config', () => {
-  test('exposes the configured support contact', async () => {
+  test('exposes runtime auth configuration', async () => {
     const res = await request(app).get('/api/config');
     expect(res.status).toBe(200);
-    expect(res.body.supportTeamsContact).toBe('support@contoso.com');
+    expect(res.body.authDisabled).toBe(true);
+    expect(res.body.auth.disabled).toBe(true);
   });
 });
 
@@ -81,7 +81,7 @@ describe('POST /api/cases', () => {
     expect(res.body.status).toBe('open');
     expect(res.body.customer.name).toBe('Jane Doe');
     expect(res.body.createdBy.username).toBe('dev@local');
-    expect(res.body.teamsChatUrl).toContain('teams.microsoft.com');
+    expect(res.body.teamsChatUrl).toContain('serviceapi-uat.glory-global.com');
     expect(res.body.teamsChatUrl).toContain(res.body.caseNumber);
 
     const stored = await db

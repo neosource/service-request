@@ -23,7 +23,6 @@ const config = {
     clientId: process.env.ENTRA_CLIENT_ID || '',
     audience: process.env.ENTRA_AUDIENCE || '',
   },
-  supportTeamsContact: process.env.SUPPORT_TEAMS_CONTACT || 'support@contoso.com',
   disableAuth: String(process.env.DISABLE_AUTH || '').toLowerCase() === 'true',
 };
 

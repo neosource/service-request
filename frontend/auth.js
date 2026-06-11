@@ -13,8 +13,8 @@ window.AppAuth = (function () {
   // ----- CONFIGURE -----
   const CONFIG = {
     tenantId: '28825646-ef41-4c9b-b69e-305d76fc24e5',
-    clientId: 'c16f448f-1ce6-4950-b07e-6815c9afca6b',
-    apiScope: 'api://c16f448f-1ce6-4950-b07e-6815c9afca6b/access_as_user',
+    clientId: '25ad7b8a-b980-4b2c-8df0-ba2d77eb9199',
+    apiScope: 'api://25ad7b8a-b980-4b2c-8df0-ba2d77eb9199/access_as_user',
   };
   // ---------------------
 

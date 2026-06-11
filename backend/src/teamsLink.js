@@ -1,8 +1,7 @@
 'use strict';
 
 /**
- * Builds a Microsoft Teams "deep link" that opens a new chat with the
- * configured support contact, with a starter message pre-filled.
+ * Builds a Microsoft Teams chat API link for the provided UPN and case number.
  *
  * Docs: https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/deep-links
  *
@@ -12,20 +11,32 @@
  *     &message=<encoded first message>
  */
 
-function buildTeamsChatLink({ supportContact, caseNumber, summary }) {
-  if (!supportContact) throw new Error('supportContact is required');
+function buildTeamsChatLink({ upn, caseNumber }) {
+  // the URL for the Teams chat API that we created
+  const teamsChatLink = 'https://serviceapi-uat.glory-global.com/api/teamsapi/chats';
+
+  if (!upn) throw new Error('upn is required');
   if (!caseNumber) throw new Error('caseNumber is required');
 
-  const message =
-    `Need support on case ${caseNumber}.` +
-    (summary ? ` Summary: ${summary}` : '');
-
   const params = new URLSearchParams({
-    users: supportContact,
-    message,
+    upn,
+    chatName: caseNumber,
+    'subscription-key': '3bc3b9e04e7c45bbb90630a458600ed5'
   });
 
-  return `https://teams.microsoft.com/l/chat/0/0?${params.toString()}`;
+  const url = `${teamsChatLink}?${params.toString()}`;
+  const maskedParams = {
+    upn,
+    chatName: caseNumber,
+    'subscription-key': '***masked***',
+  };
+  // Log generated chat link context for troubleshooting without exposing secrets.
+  console.info('[teamsLink] Generated Teams chat link', {
+    url,
+    params: maskedParams,
+  });
+  
+  return url;
 }
 
 module.exports = { buildTeamsChatLink };
