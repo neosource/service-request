@@ -8,7 +8,6 @@ A web application for **call center agents** to file service requests on behalf 
 - **Auto-generated case numbers** in the form `SR-YYYYMMDD-NNNNN`, unique even under concurrent writes.
 - **"Chat with Support" button** that opens a new Microsoft Teams chat pre-titled with the case number and a starter message containing the case context.
 - **MongoDB persistence** with sensible indexes, including a unique index on `caseNumber`.
-- **Container runtime scripts (Podman or Docker)** to bring up a configured MongoDB container with the application database, user, and indexes ready to go.
 - **Test suite** covering case-number generation, input validation, auth middleware, the Teams deep-link builder, and the full HTTP API.
 
 ## Repository layout
@@ -36,49 +35,18 @@ service-request-app/
 │   ├── styles.css
 │   ├── auth.js                  # MSAL.js wrapper
 │   └── app.js                   # UI logic
-├── scripts/
-│   ├── mongodb-podman.sh        # Podman script to run MongoDB
-│   ├── mongodb-docker.sh        # Docker script to run MongoDB
-│   └── mongo-init/
-│       └── 01-init-app-user.js # auto-generated Mongo init script
 └── Containerfile                # builds backend + bundles frontend
 ```
 
 ## Quick start
 
-### 1. Start MongoDB with Podman or Docker
-
-Choose one runtime and run the matching script.
-
-#### Option A: Podman
-
-```bash
-cd scripts
-./mongodb-podman.sh up
-```
-
-Useful commands: `./mongodb-podman.sh status | logs | shell | down | purge`.
-
-#### Option B: Docker
-
-```bash
-cd scripts
-./mongodb-docker.sh up
-```
-
-Useful commands: `./mongodb-docker.sh status | logs | shell | down | purge`.
-
-This creates a `sr-mongo` container with:
-- a root admin user (`root` / `rootpass-change-me` — override with env vars)
-- an application user (`srapp` / `srapp-pass`) with `readWrite` on the `service_requests` database
-- the `serviceRequests` and `counters` collections, plus required indexes
-
-### 2. Configure and run the backend
+### 1. Configure and run the backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env to set ENTRA_TENANT_ID, ENTRA_CLIENT_ID, ENTRA_AUDIENCE, etc.
+# Edit .env and set MONGO_URI to your remote MongoDB deployment.
+# Also set ENTRA_TENANT_ID, ENTRA_CLIENT_ID, ENTRA_AUDIENCE, etc.
 npm install
 npm start
 ```
@@ -87,7 +55,7 @@ For local development without Entra, set `DISABLE_AUTH=true` in `.env`. The API 
 
 The backend serves the SPA from `/` and the API under `/api/*`, so a single port hosts everything.
 
-### 3. Open the app
+### 2. Open the app
 
 Visit <http://localhost:3000>. Sign in with a Microsoft account, fill in the form, and submit. After creating a case, the **Chat with Support** button opens Microsoft Teams with a new chat pre-titled with the case number.
 

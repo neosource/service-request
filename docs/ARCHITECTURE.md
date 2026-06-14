@@ -88,7 +88,7 @@ The recipient UPN is taken from the authenticated user identity (`req.user.usern
 ## Configuration (env)
 | Variable                  | Description                                  |
 |---------------------------|----------------------------------------------|
-| `MONGO_URI`              | e.g. `mongodb://localhost:27017/service_requests` |
+| `MONGO_URI`              | Required remote MongoDB connection string |
 | `PORT`                   | API port, default `3000`                    |
 | `ENTRA_TENANT_ID`        | Azure tenant GUID                            |
 | `ENTRA_CLIENT_ID`        | App registration (API) client ID             |

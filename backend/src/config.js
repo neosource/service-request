@@ -2,6 +2,14 @@
 
 require('dotenv').config();
 
+function requiredEnv(name) {
+  const value = process.env[name];
+  if (!value || !String(value).trim()) {
+    throw new Error(`${name} must be set`);
+  }
+  return String(value).trim();
+}
+
 function parseCorsOrigins(value) {
   if (!value) {
     return ['http://localhost:3000', 'http://localhost:8080'];
@@ -15,9 +23,7 @@ function parseCorsOrigins(value) {
 const config = {
   port: parseInt(process.env.PORT, 10) || 3000,
   corsOrigins: parseCorsOrigins(process.env.CORS_ORIGIN),
-  mongoUri:
-    process.env.MONGO_URI ||
-    'mongodb://localhost:27017/service_requests',
+  mongoUri: requiredEnv('MONGO_URI'),
   entra: {
     tenantId: process.env.ENTRA_TENANT_ID || '',
     clientId: process.env.ENTRA_CLIENT_ID || '',
